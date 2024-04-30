@@ -36,22 +36,26 @@ private slots:
 
     void on_pushButtonSave_clicked();
 
-    void on_checkBoxFemale();
-
-    void on_checkBoxMale();
-
-
     void on_pushButtonRead_clicked();
 
     void on_pushButtonClear_clicked();
 
     void on_pushButtonNext_clicked();
 
+    void on_checkBoxFemale();
+
+    void on_checkBoxMale();
+
+
 private:
     Ui::MainWindow *ui;
     std::vector<Student> StudentVec;
     Student stdObj;
     char str[80];
+    QString showData = "";
+    int currentStudentIndex = 0;
+    QString line;
+    QStringList data;
 
 };
 #endif // MAINWINDOW_H

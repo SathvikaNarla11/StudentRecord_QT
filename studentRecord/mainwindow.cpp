@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
+#include <string>
+#include <QDebug>
 using namespace std;
 
 MainWindow::MainWindow(QWidget *parent)
@@ -8,25 +9,21 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    //    auto s = ui->lineEdit_name->text();
-    //    connect(ui->lineEdit_name,SIGNAL(textChanged(QString)),ui->textEdit,SLOT(setPlainText(QString)));
-    //    connect(ui->lineEdit_name,SIGNAL(textChanged(QString)),ui->pushButton,SLOT(on_some_pushButton_clicked(s)));
+
+    //    connect(ui->pushButtonAddRecord,SIGNAL(clicked),this,SLOT(on_pushButtonAddRecord_clicked()));
+    //    connect(ui->pushButtonShow,SIGNAL(clicked),this,SLOT(on_pushButtonShow_clicked));
 
     connect(ui->pushButtonAddRecord,&QPushButton::pressed,this,&MainWindow::on_pushButtonAddRecord_clicked);
     connect(ui->pushButtonShow,&QPushButton::clicked,this,&MainWindow::on_pushButtonShow_clicked);
-
-
-    //    connect(ui->pushButtonAddRecord,SIGNAL(clicked),this,SLOT(on_pushButtonAddRecord_clicked()));
-
-    //    connect(ui->pushButtonShow,SIGNAL(clicked),this,SLOT(on_pushButtonShow_clicked));
-
-    connect(ui->pushButtonSave,SIGNAL(clicked),this,SLOT(on_pushButtonAddSave_clicked()));
+    connect(ui->pushButtonRead,SIGNAL(pressed),this,SLOT(on_pushButtonSave_clicked));
+    connect(ui->pushButtonSave,SIGNAL(clicked),this,SLOT(on_pushButtonSave_clicked));
+    connect(ui->pushButtonNext,SIGNAL(clicked),this,SLOT(on_pushButtonNext_clicked));
+    connect(ui->pushButtonClear,SIGNAL(clicked),this,SLOT(on_pushButtonClear_clicked));
 
     connect(ui->checkBoxFemale,&QCheckBox::stateChanged,this,&MainWindow::on_checkBoxFemale);
-
     connect(ui->checkBoxMale,&QCheckBox::stateChanged,this,&MainWindow::on_checkBoxMale);
 
-    connect(ui->pushButtonRead,&QPushButton::clicked,this,&MainWindow::on_pushButtonRead_clicked);
+
 
     QRegularExpressionValidator *validator = new QRegularExpressionValidator(QRegularExpression("[A-Za-z\\s]{40}"),this);
     ui->lineEdit_name->setValidator(validator);
@@ -35,12 +32,11 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_age->setValidator(validator2);
 
     ui->lineEdit_rollno->setValidator(validator2);
-    ui->lineEdit_English->setValidator(validator2);
     ui->lineEdit_Math->setValidator(validator2);
     ui->lineEdit_Science->setValidator(validator2);
     ui->lineEdit_English->setValidator(validator2);
     ui->lineEdit_Geography->setValidator(validator2);
-
+    ui->lineEdit_History->setValidator(validator2);
 
 }
 
@@ -53,7 +49,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButtonAddRecord_clicked()
 {
-
     stdObj.name = ui->lineEdit_name->text().toStdString();
     stdObj.rno = ui->lineEdit_rollno->text().toInt();
     stdObj.age = ui->lineEdit_age->text().toInt();
@@ -65,17 +60,18 @@ void MainWindow::on_pushButtonAddRecord_clicked()
     stdObj.SubjectsMap["History"] = ui->lineEdit_History->text().toInt();
 
     StudentVec.push_back(stdObj);
-
     QMessageBox::information(this,"Student Record","Student data is added.");
+
 }
 
 
 void MainWindow::on_pushButtonShow_clicked()
 {
     QString showData;
-    //    for(const auto &obj : StudentVec)
-    for(unsigned int i=0;i < StudentVec.size();i++)
+  unsigned int i;
+    for(i=0;i < StudentVec.size();i++)
     {
+
         showData += "Name : ";
         showData += StudentVec[i].name.c_str();
         showData += "\nAge : ";
@@ -88,11 +84,7 @@ void MainWindow::on_pushButtonShow_clicked()
         showData += "\n";
         showData += "\nMarks of the student ";
 
-        //        for(map<Student> sub : obj.SubjectsMap)
-        //        for(int j=SubjectsMap.begin();j!=SubjectsMap.end();j++)
-
         map<string,int>::iterator j;
-
         for(j =stdObj.SubjectsMap.begin(); j != stdObj.SubjectsMap.end();j++)
         {
             showData += "\n";
@@ -101,6 +93,7 @@ void MainWindow::on_pushButtonShow_clicked()
             showData += QString::number(j->second);
         }
         showData += "\n_______________________________\n";
+
     }
     ui->textEditShow->setText(showData);
 }
@@ -126,56 +119,145 @@ void MainWindow::on_pushButtonSave_clicked()
         }
         line.pop_back();
         fio << line << endl;
+
     }
+
     QMessageBox::information(this,"Student Record","Student data is saved.");
 }
 
 void MainWindow::on_pushButtonRead_clicked()
 {
-    //    ifstream file("StudentRecord.txt");
-
-    //    while (file.getline(str,80))
-    //    {
-    //        ui->textEditShow->setText(str);
-    //    }
-
-    on_pushButtonClear_clicked();
     QFile file("StudentRecord.txt");
-    if (file.open(QFile::ReadOnly | QFile::Text))
+
+    if (!file.open(QFile::ReadOnly | QFile::Text))
     {
-        QTextStream in(&file);
-        QString line = in.readLine();
-        QStringList data = line.split(',');
-
-        QString record;
-        record += ("Name: " + data[0] + "\nAge : " + data[1] + "\nRoll No. : " + data[2] + "\nGender : " + data[3] +
-          "\nEnglish : " + data[5] + "\nMath : " + data[7] +"\nScience : " + data[9] + "\nGeography : " + data[11] + "\nHistory : " + data[13]);
-        ui->textEditShow->setText(record);
-
-        ui->lineEdit_name->setText(data[0]);
-        ui->lineEdit_age->setText(data[1]);
-        ui->lineEdit_rollno->setText(data[2]);
-
-        if (data[3] == "M")
-        {
-            ui->checkBoxMale->setChecked(true);
-        }
-        else if (data[3] == "F")
-        {
-            ui->checkBoxFemale->setChecked(true);
-        }
-
-        ui->lineEdit_English->setText(data[5]);
-        ui->lineEdit_Math->setText(data[7]);
-        ui->lineEdit_Science->setText(data[9]);
-        ui->lineEdit_Geography->setText(data[11]);
-        ui->lineEdit_History->setText(data[13]);
+        QMessageBox::warning(this, "Error", "Failed to open file.");
+        return;
     }
 
-    file.close();
+    QTextStream in(&file);
+    while (!in.atEnd())
+    {
+        line = in.readLine();
+        data = line.split(',');
+
+        Student student;
+
+        student.name = data[0].toStdString();
+        student.age = data[1].toInt();
+        student.rno = data[2].toInt();
+        student.sex = data[3].toStdString();
+
+
+        for (int i = 4; i < data.size(); i += 2)
+        {
+            student.SubjectsMap[data[i].toStdString()] = data[i + 1].toInt();
+        }
+
+        StudentVec.push_back(student);
+
+        qDebug() << "Contents of StudentVec:";
+        for (const auto& student : StudentVec)
+        {
+            qDebug() << "Name: " << QString::fromStdString(student.name);
+            qDebug() << "Age: " << student.age;
+            qDebug() << "Roll No.: " << student.rno;
+
+            qDebug() << "Subjects:";
+            for (const auto& subject : student.SubjectsMap)
+            {
+                qDebug() << subject.first.c_str() << ": " << subject.second;
+            }
+            qDebug() << "---------------------";
+        }
+    }
+
+    showData += ("Name: " + data[0] + "\nAge : " + data[1] + "\nRoll No. : " + data[2] + "\nGender : " + data[3] +
+            "\nEnglish : " + data[5] + "\nMath : " + data[7] +"\nScience : " + data[9] + "\nGeography : " + data[11] + "\nHistory : " + data[13]+"\n\n");
+
+    ui->textEditShow->setText(showData);
+    ui->lineEdit_name->setText(data[0]);
+    ui->lineEdit_age->setText(data[1]);
+    ui->lineEdit_rollno->setText(data[2]);
+
+    if (data[3] == "M")
+    {
+        ui->checkBoxMale->setChecked(true);
+    }
+    else if (data[3] == "F")
+    {
+        ui->checkBoxFemale->setChecked(true);
+    }
+
+    ui->lineEdit_English->setText(data[5]);
+    ui->lineEdit_Math->setText(data[7]);
+    ui->lineEdit_Science->setText(data[9]);
+    ui->lineEdit_Geography->setText(data[11]);
+    ui->lineEdit_History->setText(data[13]);
 
 }
 
+
+
+void MainWindow::on_pushButtonNext_clicked()
+{
+    static int count = 0;
+    qDebug() << "Next button clicked";
+    int l = StudentVec.size();
+
+    qDebug() << "Number of student records in StudentVec:" << l;
+    on_pushButtonClear_clicked();
+    if (count < l)
+    {
+        qDebug() << "Displaying student record #" << (count + 1);
+        qDebug() <<"name : "<< StudentVec[count].name.c_str();
+        ui->lineEdit_name->setText(StudentVec[count].name.c_str());
+        ui->lineEdit_age->setText(QString::number(StudentVec[count].age));
+        ui->lineEdit_rollno->setText(QString::number(StudentVec[count].rno));
+
+        if (StudentVec[count].sex == "M")
+        {
+            ui->checkBoxMale->setChecked(true);
+        }
+        else if (StudentVec[count].sex == "F")
+        {
+            ui->checkBoxFemale->setChecked(true);
+        }
+        ui->lineEdit_English->setText(QString::number(StudentVec[count].SubjectsMap["English"]));
+        ui->lineEdit_Math->setText(QString::number(StudentVec[count].SubjectsMap["Maths"]));
+        ui->lineEdit_Science->setText(QString::number(StudentVec[count].SubjectsMap["Science"]));
+        ui->lineEdit_Geography->setText(QString::number(StudentVec[count].SubjectsMap["Geography"]));
+        ui->lineEdit_History->setText(QString::number(StudentVec[count].SubjectsMap["History"]));
+
+
+        QString studentInfo;
+        studentInfo += ("Name: " + QString::fromStdString(StudentVec[count].name) + "\nAge : " + QString::number(StudentVec[count].age) + "\nRoll No. : "
+                        + QString::number(StudentVec[count].rno));
+        if (StudentVec[count].sex == "M")
+        {
+            studentInfo += "\nGender: M";
+        }
+        else if (StudentVec[count].sex == "F")
+        {
+            studentInfo += "\nGender: F";
+        }
+        studentInfo += "\n\nMarks of the student";
+        for (auto it = StudentVec[count].SubjectsMap.begin(); it != StudentVec[count].SubjectsMap.end(); ++it)
+        {
+            studentInfo += "\n" + QString::fromStdString(it->first) + " : " + QString::number(it->second);
+        }
+        ui->textEditShow->setText(studentInfo);
+
+
+        count++;
+    }
+    else
+    {
+        QMessageBox::information(this,"Pop Up","End of the file.");
+        count = 0;
+    }
+
+}
 
 void MainWindow::on_checkBoxMale()
 {
@@ -223,66 +305,3 @@ void MainWindow::on_pushButtonClear_clicked()
     ui->lineEdit_History->clear();
     ui->textEditShow->clear();
 }
-
-void MainWindow::on_pushButtonNext_clicked()
-{
-    QFile file("StudentRecord.txt");
-    vector<QString> s;
-
-    static int count = 0;
-    count++;
-
-    if (file.open(QFile::ReadOnly | QFile::Text))
-    {
-        QTextStream in(&file);
-
-        while (!in.atEnd())
-        {
-
-            QString line = in.readLine();
-            s.push_back(line);
-        }
-        int l = s.size();
-        if(count == l)
-        {
-            QMessageBox::information(this,"Pop Up","End of the file.");
-            return;
-        }
-
-        on_pushButtonClear_clicked();
-
-        for(int i = count; i <= count; i++)
-        {
-            qDebug () << s[i];
-            QStringList data = s[i].split(',');
-            ui->lineEdit_name->setText(data[0]);
-            ui->lineEdit_age->setText(data[1]);
-            ui->lineEdit_rollno->setText(data[2]);
-
-            if (data[3] == "M")
-            {
-                ui->checkBoxMale->setChecked(true);
-            }
-            else if (data[3] == "F")
-            {
-                ui->checkBoxFemale->setChecked(true);
-            }
-
-            ui->lineEdit_English->setText(data[5]);
-            ui->lineEdit_Math->setText(data[7]);
-            ui->lineEdit_Science->setText(data[9]);
-            ui->lineEdit_Geography->setText(data[11]);
-            ui->lineEdit_History->setText(data[13]);
-
-            //************************************
-            QString record;
-            record += ("Name: " + data[0] + "\nAge : " + data[1] + "\nRoll No. : " + data[2] + "\nGender : " + data[3] +
-              "\nEnglish : " + data[5] + "\nMath : " + data[7] +"\nScience : " + data[9] + "\nGeography : " + data[11] + "\nHistory : " + data[13]);
-            ui->textEditShow->setText(record);
-        }
-    }
-
-    file.close();
-
-}
-
