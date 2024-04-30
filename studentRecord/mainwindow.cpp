@@ -19,6 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButtonSave,SIGNAL(clicked),this,SLOT(on_pushButtonSave_clicked));
     connect(ui->pushButtonNext,SIGNAL(clicked),this,SLOT(on_pushButtonNext_clicked));
     connect(ui->pushButtonClear,SIGNAL(clicked),this,SLOT(on_pushButtonClear_clicked));
+    connect(ui->pushButtonPrevious,SIGNAL(clicked),this,SLOT(on_pushButtonPrevious_clicked));
 
     connect(ui->checkBoxFemale,&QCheckBox::stateChanged,this,&MainWindow::on_checkBoxFemale);
     connect(ui->checkBoxMale,&QCheckBox::stateChanged,this,&MainWindow::on_checkBoxMale);
@@ -258,6 +259,67 @@ void MainWindow::on_pushButtonNext_clicked()
     }
 
 }
+
+void MainWindow::on_pushButtonPrevious_clicked()
+{
+    static int count = StudentVec.size()-1;
+    qDebug() << "Next button clicked";
+    int l = StudentVec.size();
+
+    qDebug() << "Number of student records in StudentVec:" << l;
+    on_pushButtonClear_clicked();
+    if (count >= 0)
+    {
+        qDebug() << "Displaying student record #" << (count + 1);
+        qDebug() <<"name : "<< StudentVec[count].name.c_str();
+        ui->lineEdit_name->setText(StudentVec[count].name.c_str());
+        ui->lineEdit_age->setText(QString::number(StudentVec[count].age));
+        ui->lineEdit_rollno->setText(QString::number(StudentVec[count].rno));
+
+        if (StudentVec[count].sex == "M")
+        {
+            ui->checkBoxMale->setChecked(true);
+        }
+        else if (StudentVec[count].sex == "F")
+        {
+            ui->checkBoxFemale->setChecked(true);
+        }
+        ui->lineEdit_English->setText(QString::number(StudentVec[count].SubjectsMap["English"]));
+        ui->lineEdit_Math->setText(QString::number(StudentVec[count].SubjectsMap["Maths"]));
+        ui->lineEdit_Science->setText(QString::number(StudentVec[count].SubjectsMap["Science"]));
+        ui->lineEdit_Geography->setText(QString::number(StudentVec[count].SubjectsMap["Geography"]));
+        ui->lineEdit_History->setText(QString::number(StudentVec[count].SubjectsMap["History"]));
+
+
+        QString studentInfo;
+        studentInfo += ("Name: " + QString::fromStdString(StudentVec[count].name) + "\nAge : " + QString::number(StudentVec[count].age) + "\nRoll No. : "
+                        + QString::number(StudentVec[count].rno));
+        if (StudentVec[count].sex == "M")
+        {
+            studentInfo += "\nGender: M";
+        }
+        else if (StudentVec[count].sex == "F")
+        {
+            studentInfo += "\nGender: F";
+        }
+        studentInfo += "\n\nMarks of the student";
+        for (auto it = StudentVec[count].SubjectsMap.begin(); it != StudentVec[count].SubjectsMap.end(); ++it)
+        {
+            studentInfo += "\n" + QString::fromStdString(it->first) + " : " + QString::number(it->second);
+        }
+        ui->textEditShow->setText(studentInfo);
+
+
+        count--;
+    }
+    else
+    {
+        QMessageBox::information(this,"Pop Up","End of the file.");
+        count = StudentVec.size()-1;
+    }
+
+}
+
 
 void MainWindow::on_checkBoxMale()
 {

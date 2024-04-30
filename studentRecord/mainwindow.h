@@ -46,6 +46,8 @@ private slots:
 
     void on_checkBoxMale();
 
+    void on_pushButtonPrevious_clicked();
+
 
 private:
     Ui::MainWindow *ui;
